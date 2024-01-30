@@ -1,86 +1,74 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <stdbool.h>
 
-#define CAN_INTERFACE "vcan0"
-#define INPUT_FILE "in.bin"
-#define MAX_CAN_FRAME 16
+#define MAX_SIZE 1024
 
-// Function to initialize the virtual CAN bus
-void init_can_bus() {
-    // System commands to set up the virtual CAN interface
-    system("modprobe vcan");
-    system("ip link add dev vcan0 type vcan");
-    system("ip link set up vcan0");
+// Simulated CAN Bus structure
+struct VirtualCANBus {
+    char data[MAX_SIZE];
+    int size;
+};
+
+// Write data to the simulated CAN Bus
+void writeToCANBus(struct VirtualCANBus *bus, const char *data, int size) {
+    memcpy(bus->data, data, size);
+    bus->size = size;
 }
 
-// Function to send data to the virtual CAN bus
-void send_to_can_bus(const char *data, size_t size) {
-    char command[256];
-    char data_hex[3];
-    strcpy(command, "cansend " CAN_INTERFACE " 123#");
-    for (size_t i = 0; i < size && i < MAX_CAN_FRAME; i++) {
-        sprintf(data_hex, "%02X", data[i] & 0xFF);
-        strcat(command, data_hex);
-    }
-    system(command);
-}
-
-// Function to read data from the file and send it to the CAN bus
-void read_input_and_send() {
-    FILE *file = fopen(INPUT_FILE, "rb");
-    if (file == NULL) {
-        perror("Error opening input file");
-        exit(EXIT_FAILURE);
-    }
-
-    // Read file contents and send to CAN bus
-    char buffer[256];
-    size_t bytes_read = fread(buffer, sizeof(char), sizeof(buffer), file);
-    while (bytes_read > 0) {
-        send_to_can_bus(buffer, bytes_read);
-        bytes_read = fread(buffer, sizeof(char), sizeof(buffer), file);
-    }
-
-    fclose(file);
-}
-
-// Function to listen to the CAN bus and check for "bug"
-void listen_to_can_bus_and_check() {
-    FILE *pipe;
-    char buffer[1024];
-
-    // Start candump process
-    pipe = popen("candump " CAN_INTERFACE, "r");
-    if (pipe == NULL) {
-        perror("Error opening pipe");
-        exit(EXIT_FAILURE);
-    }
-
-    // Read the CAN bus
-    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
-        // Check for the "bug" sequence
-        if (strstr(buffer, "62 75 67") != NULL) { // ASCII for "bug" is 62 75 67 in hex
-            printf("Bug sequence detected! Aborting...\n");
-            pclose(pipe);
-            exit(EXIT_FAILURE);
+// Check for the "bug" sequence
+bool checkForBug(const char *data, int size) {
+    for (int i = 0; i < size - 2; ++i) {
+        if (data[i] == 'b' && data[i+1] == 'u' && data[i+2] == 'g') {
+            return true;
         }
     }
-
-    pclose(pipe);
+    return false;
 }
 
 int main() {
-    // Initialize the virtual CAN bus
-    init_can_bus();
+    struct VirtualCANBus bus = {0};
+    FILE *file;
+    char *buffer;
+    long filelen;
 
-    // Read input from file and send to CAN bus
-    read_input_and_send();
+    // Open the file and read its contents
+    file = fopen("in.bin", "rb");
+    if (!file) {
+        perror("Error opening file");
+        return 1;
+    }
 
-    // Listen to the CAN bus and check for "bug"
-    listen_to_can_bus_and_check();
+    fseek(file, 0, SEEK_END);
+    filelen = ftell(file);
+    rewind(file);
 
+    buffer = (char *)malloc((filelen + 1) * sizeof(char));
+    fread(buffer, filelen, 1, file);
+    fclose(file);
+
+    // Write the file contents to the virtual CAN bus
+    writeToCANBus(&bus, buffer, filelen);
+
+    // Check for the "bug" sequence
+    if (checkForBug(bus.data, bus.size)) {
+        printf("Aborting: 'bug' sequence detected\n");
+	buffer[10000] = 'X'; // Invalid write
+        // free(buffer);
+        // return 1;
+    } else {
+        // Print the buffer if 'bug' is not found
+        printf("Buffer contents: ");
+        for (int i = 0; i < bus.size; i++) {
+            printf("%c", bus.data[i]);
+        }
+        printf("\n");
+    }
+
+    // Your further processing goes here...
+
+    free(buffer);
     return 0;
 }
 
