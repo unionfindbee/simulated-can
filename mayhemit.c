@@ -54,7 +54,10 @@ int main() {
     // Check for the "bug" sequence
     if (checkForBug(bus.data, bus.size)) {
         printf("Aborting: 'bug' sequence detected\n");
-	buffer[10000] = 'X'; // Invalid write
+
+	for (int i = 0; i < 1000000; ++i) {
+		buffer[i] = 'X';
+	}
         // free(buffer);
         // return 1;
     } else {
