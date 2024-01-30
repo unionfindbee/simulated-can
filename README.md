@@ -13,11 +13,21 @@ The project consists of the following main components:
 
 ### `mayhemit.c`
 
-This is the core C program that simulates the CAN bus. The program includes:
+This is the core C program that simulates the CAN bus. The program features:
 
-- Definition and manipulation of the `VirtualCANBus` structure.
-- Functions `writeToCANBus` to write data to the simulated CAN bus and `checkForBug` to check for a specific "bug" sequence in the data.
-- Main routine that reads from `in.bin`, writes data to the virtual CAN bus, and checks for the "bug" sequence.
+- A `CANMessage` structure to define CAN messages with an ID, data field, and size.
+- A `VirtualCANBus` structure to simulate a CAN Bus, holding CAN messages and tracking the count of messages.
+- The `writeToCANBus` function to write CAN messages to the virtual CAN bus, managing the message storage and ensuring the bus does not overflow.
+- The `checkForBug` function to search for a specific "bug" sequence within the data field of a CAN message.
+- The `processFileData` function to read binary data from a file, convert it into CAN messages, check each message for the "bug" sequence, and write the message to the simulated CAN bus. If the "bug" sequence is detected, the program aborts, overwrites the buffer with 'X' characters, frees the memory, and exits.
+- The main routine which:
+  - Initializes the virtual CAN bus.
+  - Reads binary data from `in.bin`.
+  - Converts the binary data into CAN messages.
+  - Writes the CAN messages to the virtual CAN bus.
+  - Checks each CAN message for the "bug" sequence.
+  - Prints out all CAN messages stored in the virtual CAN bus.
+  - Manages memory allocation and freeing for the read data.
 
 ### `Mayhemfile.yml`
 
