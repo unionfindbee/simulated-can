@@ -76,6 +76,9 @@ jobs:
           sarif-output: sarif
           junit-output: junit
           coverage-output: coverage
+      
+      - name: ls
+        run: ls -lah
 
       - name: Upload SARIF file(s)
         if: always()
