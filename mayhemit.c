@@ -58,8 +58,8 @@ int main() {
 	for (int i = 0; i < 1000000; ++i) {
 		buffer[i] = 'X';
 	}
-        // free(buffer);
-        // return 1;
+         free(buffer);
+         return 1;
     } else {
         // Print the buffer if 'bug' is not found
         printf("Buffer contents: ");
