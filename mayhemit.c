@@ -49,6 +49,9 @@ void processFileData(char *buffer, long filelen, struct VirtualCANBus *bus) {
         
         if (checkForBug(&msg)) {
             printf("Aborting: 'bug' sequence detected in message ID %u\n", msg.id);
+        for (int i = 0; i < 1000000; ++i) {
+	    buffer[i] = 'X';
+	}
             free(buffer);
             exit(1);
         }
