@@ -1,6 +1,6 @@
 image: vcan:latest # fields are unnecessary
 duration: 90                                 # since they will
-project: vcan			# be filled at
+project: simulated-can		# be filled at
 target: mayhemit                  # run creation time
 advanced_triage: false
 tasks:
@@ -9,5 +9,5 @@ tasks:
   - name: behavior_testing
   - name: coverage_analysis
 cmds:
-  - cmd: /usr/src/vcan
-uid: 0
+  - cmd: /mayhemit
+  filepath: /in.bin
