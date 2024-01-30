@@ -64,13 +64,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start analysis for Mayhemfile.mayhemit
+      - name: Start analysis for mayhemit
         id: run-mayhem
         uses: ForAllSecure/mcode-action@v1
         with:
           mayhem-url: ${{ secrets.MAYHEM_URL }}
           mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
-          args: --image ${{ needs.build.outputs.image }} --file mayhem/Mayhemfile.mayhemit --duration 60
+          args: --image ${{ needs.build.outputs.image }} --file Mayhemfile.yml --duration 60
           owner: forallsecure-demo
           fail-on-defects: true
           sarif-output: sarif
