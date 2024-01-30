@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Description: This script will compile the mayhemit example and test it using Mayhem For Code
+
 # Load the environment variables
 source .env
 NAME="simulated-can"

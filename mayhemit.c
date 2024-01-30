@@ -66,7 +66,6 @@ int main() {
         printf("\n");
     }
 
-    // Your further processing goes here...
 
     free(buffer);
     return 0;
